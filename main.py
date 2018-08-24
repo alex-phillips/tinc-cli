@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+from subprocess import call
 import argparse
 import yaml
 import os
 import sys
+import requests
 
 parser = argparse.ArgumentParser(usage="main.py <network> <hostname>")
 parser.add_argument("network", help="Network to configure")
@@ -60,5 +62,29 @@ Interface = {interface}
 AddressFamily = {address_family}
 {host_list}
 """.format(hostname=args.hostname, interface=net_config['interface'], address_family=net_config['address_family'], host_list=host_list))
+
+if not os.path.exists("{}/hosts".format(net_location)):
+    os.makedirs("{}/hosts".format(net_location))
+
+if 'hosts_repo' in net_config:
+    print("Attempting to download existing host keys...")
+    for hostname in net_config['hosts']:
+        host_key_loc = "{}/hosts/{}".format(net_location, hostname)
+        if os.path.exists(host_key_loc):
+            print("Key file for {} exists. Skipping.".format(hostname))
+            continue
+
+        response = requests.get("{}/{}".format(net_config['hosts_repo'].rstrip('/'), hostname))
+        if not response.status_code == 200:
+            print("Host {} key doesn't exist. Skipping.".format(hostname))
+            continue
+
+        with open(host_key_loc, 'w') as handle:
+            handle.write(str(response.content))
+
+if not os.path.exists("{}/hosts/{}".format(net_location, args.hostname)):
+    cmd = 'tincd -c {} -n {} -K4096'.format(net_location, args.network)
+    print("Executing command: {}".format(cmd))
+    call(cmd.split(' '))
 
 print("Done.")
