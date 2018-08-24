@@ -1,0 +1,14 @@
+networks:
+  cloud:
+    interface: tun0
+    route: 10.0.1.0/24
+    address_family: ipv4
+    hosts_repo: https://github.com/my-repo/tinc-hosts
+    hosts:
+      cloud:
+        address: 1.1.1.1
+        subnet: 10.0.1.1/32
+      cloyster:
+        subnet: 10.0.1.91/32
+      lenovo:
+        subnet: 10.0.1.2/32
