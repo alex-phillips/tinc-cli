@@ -82,9 +82,19 @@ if 'hosts_repo' in net_config:
         with open(host_key_loc, 'w') as handle:
             handle.write(str(response.content))
 
-if not os.path.exists("{}/hosts/{}".format(net_location, args.hostname)):
+host_key = "{}/hosts/{}".format(net_location, args.hostname)
+if not os.path.exists(host_key):
     cmd = 'tincd -c {} -n {} -K4096'.format(net_location, args.network)
     print("Executing command: {}".format(cmd))
     call(cmd.split(' '))
+    with open(host_key, 'r') as original:
+        data = [original.read()]
+
+    if 'subnet' in host_config:
+        data.insert(0, "Subnet = {}".format(host_config['subnet']))
+    if 'address' in host_config:
+        data.insert(0, "Address = {}".format(host_config['address']))
+    with open(host_key, 'w') as new:
+        new.write("\n".join(data))
 
 print("Done.")
