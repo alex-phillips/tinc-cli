@@ -7,6 +7,7 @@ import os
 import sys
 import requests
 import stat
+import re
 
 parser = argparse.ArgumentParser(usage="main.py <network> <hostname>")
 parser.add_argument("network", help="Network to configure")
@@ -106,5 +107,16 @@ if not os.path.exists(host_key):
         data.insert(0, "Address = {}".format(host_config['address']))
     with open(host_key, 'w') as new:
         new.write("\n".join(data))
+else:
+    with open(host_key, 'r') as original:
+        data = original.read()
+
+    if 'address' in host_config:
+        data = re.sub(r'^Address = .+', "Address = {}".format(host_config['address']), data)
+    if 'subnet' in host_config:
+        data = re.sub(r'^Subnet = .+', "Subnet = {}".format(host_config['subnet']), data)
+
+    with open(host_key, 'w') as handle:
+        handle.write(data)
 
 print("Done.")
