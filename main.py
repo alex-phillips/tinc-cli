@@ -74,6 +74,8 @@ if 'hosts_repo' in net_config:
             print("Key file for {} exists. Skipping.".format(hostname))
             continue
 
+        # Point to the raw files in the repo
+        net_config['hosts_repo'] = "{}/master".format(net_config['hosts_repo'].replace('github.com', 'raw.githubusercontent.com').rstrip('/'))
         response = requests.get("{}/{}".format(net_config['hosts_repo'].rstrip('/'), hostname))
         if not response.status_code == 200:
             print("Host {} key doesn't exist. Skipping.".format(hostname))
