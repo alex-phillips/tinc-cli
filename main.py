@@ -6,6 +6,7 @@ import yaml
 import os
 import sys
 import requests
+import stat
 
 parser = argparse.ArgumentParser(usage="main.py <network> <hostname>")
 parser.add_argument("network", help="Network to configure")
@@ -43,12 +44,16 @@ with open("{}/tinc-up".format(net_location), "w") as handle:
 ip addr add {host_subnet} dev $INTERFACE
 ip route add {route} dev $INTERFACE
 """.format(host_subnet=host_config['subnet'], route=net_config['route']))
+st = os.stat("{}/tinc-up".format(net_location))
+os.chmod("{}/tinc-up".format(net_location), st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 with open("{}/tinc-down".format(net_location), "w") as handle:
     handle.write("""ip route del {route} dev $INTERFACE
 ip addr del {host_subnet} dev $INTERFACE
 ip link set $INTERFACE down
 """.format(host_subnet=host_config['subnet'], route=net_config['route']))
+st = os.stat("{}/tinc-down".format(net_location))
+os.chmod("{}/tinc-down".format(net_location), st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 host_list = []
 for hostname in net_config['hosts']:
@@ -76,7 +81,7 @@ if 'hosts_repo' in net_config:
 
         # Point to the raw files in the repo
         net_config['hosts_repo'] = "{}/master".format(net_config['hosts_repo'].replace('github.com', 'raw.githubusercontent.com').rstrip('/'))
-        response = requests.get("{}/{}".format(net_config['hosts_repo'].rstrip('/'), hostname))
+        response = requests.get("{}/{}".format(net_config['hosts_repo'], hostname))
         if not response.status_code == 200:
             print("Host {} key doesn't exist. Skipping.".format(hostname))
             continue
