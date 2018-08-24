@@ -74,6 +74,9 @@ if not os.path.exists("{}/hosts".format(net_location)):
 if 'hosts_repo' in net_config:
     print("Attempting to download existing host keys...")
     for hostname in net_config['hosts']:
+        if hostname == args.hostname:
+            continue
+
         host_key_loc = "{}/hosts/{}".format(net_location, hostname)
         if os.path.exists(host_key_loc):
             print("Key file for {} exists. Skipping.".format(hostname))
