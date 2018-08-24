@@ -5,7 +5,6 @@ import argparse
 import yaml
 import os
 import sys
-import requests
 import stat
 import re
 
