@@ -112,9 +112,15 @@ else:
         data = original.read()
 
     if 'address' in host_config:
-        data = re.sub(r'^Address = .+', "Address = {}".format(host_config['address']), data)
+        if re.search('^Address = ', data):
+            data = re.sub(r'^Address = .+', "Address = {}".format(host_config['address']), data)
+        else:
+            data = "Address = {}\n{}".format(host_config['address'], data)
     if 'subnet' in host_config:
-        data = re.sub(r'^Subnet = .+', "Subnet = {}".format(host_config['subnet']), data)
+        if re.search('^Subnet = ', data):
+            data = re.sub(r'^Subnet = .+', "Subnet = {}".format(host_config['subnet']), data)
+        else:
+            data = "Subnet = {}\n{}".format(host_config['subnet'], data)
 
     with open(host_key, 'w') as handle:
         handle.write(data)
